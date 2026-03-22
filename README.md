@@ -44,6 +44,6 @@ Feel free to use or modify it for your own learning or institutional use.
 ---
 
 ## 💡 Author
-**Your Name**  
+**Mahadi Hassan**  
 📧 *mahadi.cse.21@gmail.com*  
-🎓 *Kishoreganj University*  
+🎓 *Student Of Kishoreganj University*  
