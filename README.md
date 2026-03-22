@@ -45,5 +45,5 @@ Feel free to use or modify it for your own learning or institutional use.
 
 ## 💡 Author
 **Your Name**  
-📧 *your.email@example.com*  
+📧 *mahadi.cse.21@gmail.com*  
 🎓 *Kishoreganj University*  
