@@ -2,40 +2,58 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.3'
-        
-    - name: Install Dependencies
-      run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-      
-    - name: Prepare Deployment
-      run: |
-        mkdir -p deploy_temp
-        cp -r . deploy_temp/
-        cd deploy_temp
-        rm -rf .git .github node_modules tests storage/logs/* .env .env.*
-        mkdir -p storage/framework/{cache,sessions,views}
-        mkdir -p bootstrap/cache
-        
-    - name: FTP Deploy (Try different protocols)
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy_temp/
-        server-dir: ${{ secrets.FTP_REMOTE_DIR }}  # Use full path from root
-        protocol: ftp  # Try 'ftp' instead of 'ftps' first
-        port: 21
-        # Remove or comment out dangerous-clean-slate initially
-        # dangerous-clean-slate: false
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Prepare Deployment
+        run: |
+          # Create temporary deployment directory
+          mkdir -p deploy_temp
+
+          # Copy files excluding the deploy_temp directory itself
+          rsync -av --exclude='deploy_temp' ./ deploy_temp/
+
+          # Navigate to temp directory
+          cd deploy_temp
+
+          # Remove unnecessary files
+          rm -rf .git .github node_modules tests
+
+          # Remove log files but keep directory structure
+          rm -rf storage/logs/*
+
+          # Remove environment files (keep .env.example)
+          rm -f .env .env.*
+
+          # Create necessary directories with proper structure
+          mkdir -p storage/framework/cache
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p bootstrap/cache
+
+          # Set permissions
+          chmod -R 775 storage bootstrap/cache
+          
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy_temp/
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
+          protocol: ftp
+          port: 21
