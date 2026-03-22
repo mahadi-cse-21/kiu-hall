@@ -13,31 +13,25 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'
-        extensions: mbstring, bctype, xml, ctype, json, tokenizer, mysqli, pdo_mysql
+        php-version: '8.3'  # Updated to match server
+        extensions: mbstring, bcmath, ctype, curl, dom, fileinfo, json, openssl, pdo_mysql, tokenizer, xml, zip
         
     - name: Install Dependencies
       run: |
         composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
         
-    - name: Prepare Deployment Files
+    - name: Prepare Deployment Package
       run: |
-        # Create deployment package
+        # Create deployment package without dev dependencies
         mkdir deploy_temp
-        cp -r . deploy_temp/
-        cd deploy_temp
-        
-        # Remove unnecessary files
-        rm -rf .git .github tests node_modules storage/logs/* storage/framework/cache/* storage/framework/sessions/* storage/framework/views/* bootstrap/cache/*.php
-        
-        # Create directories with proper structure
-        mkdir -p storage/framework/cache
-        mkdir -p storage/framework/sessions
-        mkdir -p storage/framework/views
-        mkdir -p bootstrap/cache
-        
-        # Set permissions (will be handled on server)
-        chmod -R 775 storage bootstrap/cache
+        rsync -av --exclude='.git' \
+                   --exclude='.github' \
+                   --exclude='node_modules' \
+                   --exclude='tests' \
+                   --exclude='storage/logs/*' \
+                   --exclude='.env' \
+                   --exclude='deploy_temp' \
+                   ./ deploy_temp/
         
     - name: FTP Deploy
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -46,7 +40,17 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./deploy_temp/
-        server-dir: /hall.librarymh.xyz/  # Change this to your server path
-        protocol: ftp  # or ftps for secure FTP
-        port: 21  # or 22 for SFTP
-        dangerous-clean-slate: false  # Set to true to delete all files on server before deploy (CAUTION!)
+        server-dir: /public_html/hall.librarymh.xyz/  # Your domain directory
+        protocol: ftps  # Use FTPS for security if available
+        port: 21
+        exclude: |
+          .git/**
+          .github/**
+          node_modules/**
+          tests/**
+          .env
+          .env.*
+          deploy_temp/**
+          
+    - name: Cleanup
+      run: rm -rf deploy_temp
