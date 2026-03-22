@@ -25,7 +25,7 @@ jobs:
           # Create SSH directory
           mkdir -p ~/.ssh
           
-          # Write the private key (ensure proper formatting)
+          # Write the private key
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
@@ -43,26 +43,40 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # Navigate to website directory
+            # Enable maintenance mode
+            echo "Putting site in maintenance mode..."
             cd /home/${{ secrets.SSH_USERNAME }}/public_html/hall.librarymh.xyz
+            /usr/bin/alt-php83 artisan down --retry=60 || true
             
-            # Pull latest changes (if using git)
-            git pull origin main || true
+            # Pull latest changes
+            echo "Pulling latest changes..."
+            git pull origin main
             
             # Install composer dependencies
-            /usr/bin/alt-php83 /usr/local/bin/composer install --no-dev --optimize-autoloader
+            echo "Installing composer dependencies..."
+            /usr/bin/alt-php83 composer install --no-dev --optimize-autoloader --no-interaction
             
-            # Run migrations
-            /usr/bin/alt-php83 artisan migrate:fresh --seed --force
+            # Run migrations (use migrate --force for production, NOT migrate:fresh)
+            echo "Running database migrations..."
+            /usr/bin/alt-php83 artisan migrate --force
             
             # Clear and cache configuration
-            /usr/bin/alt-php83 artisan config:clear
+            echo "Caching configuration..."
             /usr/bin/alt-php83 artisan config:cache
             /usr/bin/alt-php83 artisan route:cache
             /usr/bin/alt-php83 artisan view:cache
             
+            # Restart queue workers (if using queues)
+            echo "Restarting queue workers..."
+            /usr/bin/alt-php83 artisan queue:restart || true
+            
             # Set permissions
+            echo "Setting permissions..."
             chmod -R 755 storage bootstrap/cache
             chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} storage bootstrap/cache
             
-            echo "Deployment completed successfully"
+            # Disable maintenance mode
+            echo "Bringing site back online..."
+            /usr/bin/alt-php83 artisan up
+            
+            echo "✅ Deployment completed successfully at $(date)"
