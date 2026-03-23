@@ -17,7 +17,7 @@ jobs:
 
             - name: Install Dependencies 
               run: |
-               composer install -q --no-ansi --no-interaction ---no-progress --prefer-dist
+               composer install -q --no-ansi --no-interaction --no-progress --prefer-dist
             - name: Clear config and cache
               run: |
                php artisan config:clear
