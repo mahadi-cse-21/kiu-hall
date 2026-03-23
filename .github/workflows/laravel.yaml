@@ -1,5 +1,4 @@
-
-name: CICD pipeline
+name: Deploy to  server
 on:
   push:
     branches: ["main"]
