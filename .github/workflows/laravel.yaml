@@ -1,82 +1,35 @@
-name: Deploy to Production
 
+name: CICD pipeline
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
-
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    tests:
+        runs-on: ubuntu-latest
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.3"
-          extensions: mbstring, bcmath, ctype, curl, dom, fileinfo, json, openssl, pdo_mysql, tokenizer, xml, zip
+        services:
+            mysql:
+                image: mysql:8.0
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-
-      - name: Setup SSH Key
-        run: |
-          # Create SSH directory
-          mkdir -p ~/.ssh
-          
-          # Write the private key
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # Add server to known hosts
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          
-          # Test SSH connection
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
-          
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            # Enable maintenance mode
-            echo "Putting site in maintenance mode..."
-            cd /home/${{ secrets.SSH_USERNAME }}/public_html/hall.librarymh.xyz
-            /usr/bin/alt-php83 artisan down --retry=60 || true
-            
-            # Pull latest changes
-            echo "Pulling latest changes..."
-            git pull origin main
-            
-            # Install composer dependencies
-            echo "Installing composer dependencies..."
-            /usr/bin/alt-php83 composer install --no-dev --optimize-autoloader --no-interaction
-            
-            # Run migrations (use migrate --force for production, NOT migrate:fresh)
-            echo "Running database migrations..."
-            /usr/bin/alt-php83 artisan migrate --force
-            
-            # Clear and cache configuration
-            echo "Caching configuration..."
-            /usr/bin/alt-php83 artisan config:cache
-            /usr/bin/alt-php83 artisan route:cache
-            /usr/bin/alt-php83 artisan view:cache
-            
-            # Restart queue workers (if using queues)
-            echo "Restarting queue workers..."
-            /usr/bin/alt-php83 artisan queue:restart || true
-            
-            # Set permissions
-            echo "Setting permissions..."
-            chmod -R 755 storage bootstrap/cache
-            chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} storage bootstrap/cache
-            
-            # Disable maintenance mode
-            echo "Bringing site back online..."
-            /usr/bin/alt-php83 artisan up
-            
-            echo "✅ Deployment completed successfully at $(date)"
+            - name: Install Dependencies 
+              run: |
+               composer install -q --no-ansi --no-interaction ---no-progress --prefer-dist
+            - name: Clear config and cache
+              run: |
+               php artisan config:clear
+               php artisan cache:clear
+               php artisan route:clear
+               php artisan optimize:clear
+            - name: Set Directory Permissions
+              run: chmod -R 777 storage bootstrap/cache
+            - name:  Deploy to Server
+              uses: SanKirland/FTP-Deploy-Action@v4.3.5
+              with: 
+                 server: ${{ secrets.FTP_SERVER }}
+                 username: ${{ secrets.FTP_USERNAME }}
+                 password: ${{ secrets.FTP_PASSWORD }}
+                 server-dir: /hall.librarymh.xyz/
