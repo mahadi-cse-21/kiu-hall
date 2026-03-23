@@ -27,7 +27,7 @@ jobs:
             - name: Set Directory Permissions
               run: chmod -R 777 storage bootstrap/cache
             - name:  Deploy to Server
-              uses: SanKirland/FTP-Deploy-Action@v4.3.5
+              uses: SamKirkland/FTP-Deploy-Action@v4.3.5
               with: 
                  server: ${{ secrets.FTP_SERVER }}
                  username: ${{ secrets.FTP_USERNAME }}
