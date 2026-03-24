@@ -1,5 +1,4 @@
-name: Deploy to server 
-
+name: Deploy to server  i
 on:
   push:
     branches: ["main"]
