@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen flex relative overflow-hidden bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400">
+    <div class="min-h-screen flex relative overflow-hidden">
         <!-- Animated Background Elements -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute -top-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
