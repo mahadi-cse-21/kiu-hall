@@ -1,30 +1,40 @@
-name: Deploy to  server
+name: Deploy to server
+
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
-jobs:
-    tests:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
 
-            - name: Install Dependencies 
-              run: |
-               composer install -q --no-ansi --no-interaction --no-progress --prefer-dist
-            - name: Clear config and cache
-              run: |
-               php artisan config:clear
-               
-               php artisan route:clear
-               
-            - name: Set Directory Permissions
-              run: chmod -R 777 storage bootstrap/cache
-            - name:  Deploy to Server
-              uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-              with: 
-                 server: ${{ secrets.FTP_SERVER }}
-                 username: ${{ secrets.FTP_USERNAME }}
-                 password: ${{ secrets.FTP_PASSWORD }}
-                 server-dir: /
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, bcmath, curl, mysql
+
+      - name: Install Dependencies (CI check only)
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/html/laravel-cicd
+
+            git pull origin main
+
+            composer install --no-dev --optimize-autoloader
+
+            php artisan migrate --force
+
+            php artisan config:cache
+            php artisan route:cache
+            php artisan queue:restart
