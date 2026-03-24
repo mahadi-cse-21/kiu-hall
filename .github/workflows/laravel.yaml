@@ -16,7 +16,6 @@ jobs:
             - name: Clear config and cache
               run: |
                php artisan config:clear
-               php artisan view:clear
                php artisan route:clear
                
             # - name: Set Directory Permissions
