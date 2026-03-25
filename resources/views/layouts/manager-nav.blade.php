@@ -28,6 +28,15 @@
                     class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('manager.guest') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
                     Guest Meal
                 </a>
+                
+                {{-- Logout Button (Desktop) --}}
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <button type="submit"
+                        class="text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-md text-sm font-medium transition">
+                        Logout
+                    </button>
+                </form>
             </div>
 
             {{-- Mobile Menu Button --}}
@@ -68,6 +77,15 @@
                     class="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('manager.guest') ? 'bg-blue-50 text-blue-600' : '' }}">
                     Guest Meal
                 </a>
+                
+                {{-- Logout Button (Mobile) --}}
+                <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                    @csrf
+                    <button type="submit"
+                        class="w-full text-left text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-md text-sm font-medium">
+                        Logout
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -167,6 +185,17 @@
                     }, 200);
                 });
             });
+            
+            // Handle mobile logout button separately (since it's a form)
+            const mobileLogoutForm = mobileMenu.querySelector('form');
+            if (mobileLogoutForm) {
+                mobileLogoutForm.addEventListener('click', function(e) {
+                    // Don't close the menu immediately, let the form submit
+                    setTimeout(function() {
+                        mobileMenu.classList.add('hidden');
+                    }, 100);
+                });
+            }
         }
     });
 </script>
