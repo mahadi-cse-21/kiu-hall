@@ -125,7 +125,7 @@
             });
         }
     });
-</>
+</script>
 
 <style>
     /* Smooth transition for mobile menu */
