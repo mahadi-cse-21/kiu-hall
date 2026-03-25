@@ -22,6 +22,8 @@ Route::prefix('manager')->group(function () {
 
         Route::get('/guest',[ManagerDashboardController::class,'guest'])->name('manager.guest');
 
+        Route::get('/makemanager',[ManagerDashboardController::class,'makemanager'])->name('manager.makemanager');
+
 
         Route::post('/update', [ManagerDashboardController::class, 'updatemeal'])->name('updatemeal');
 

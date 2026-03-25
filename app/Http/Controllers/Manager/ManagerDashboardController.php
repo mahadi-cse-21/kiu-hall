@@ -323,4 +323,10 @@ class ManagerDashboardController extends Controller
             ->get();
         return view('manager.guest',compact('users'));
     }
+
+    public function makemanager()
+    {
+        
+        return view('manager.makemanager');
+    }
 }
