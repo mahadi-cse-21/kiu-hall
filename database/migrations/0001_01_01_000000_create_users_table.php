@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,8 +16,8 @@ return new class extends Migration
 
             $table->string('email')->unique();
             $table->string('contact');
-            
-            $table->enum('meal_floor', ['1', '2', '3', '4', '5'])->default('1');
+
+            $table->unsignedTinyInteger('meal_floor')->default(1)->index();
             $table->enum('role', ['manager', 'user'])->default('user')->index();
             $table->enum('status', ['active', 'inactive'])->default('active')->index();
             $table->string('password');

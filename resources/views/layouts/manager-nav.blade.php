@@ -24,6 +24,10 @@
                     class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('manager.bazars') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
                     Bazar Details
                 </a>
+                <a href="{{ route('manager.makemanager') }}"
+                    class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('manager.makemanager') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
+                    Make Manager
+                </a>
                 <a href="{{ route('manager.guest') }}"
                     class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('manager.guest') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
                     Guest Meal

@@ -24,6 +24,9 @@ Route::prefix('manager')->group(function () {
 
         Route::get('/makemanager',[ManagerDashboardController::class,'makemanager'])->name('manager.makemanager');
 
+        Route::post('/makemanager',[ManagerDashboardController::class,'make'])->name('manager.make');
+        Route::delete('/destroy/{id}',[ManagerDashboardController::class,'destroy'])->name('manager.destroy');
+
 
         Route::post('/update', [ManagerDashboardController::class, 'updatemeal'])->name('updatemeal');
 

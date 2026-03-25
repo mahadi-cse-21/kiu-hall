@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 class ManagerDashboardController extends Controller
 {
 
-  public function index()
+    public function index()
     {
         $manager = Auth::user();
         $floor = $manager->meal_floor; // Manager's floor
@@ -66,7 +66,7 @@ class ManagerDashboardController extends Controller
             ->whereHas('user', fn($q) => $q->where('meal_floor', $floor))
             ->get();
 
-      
+
         // Meal stats for today
         $today_breakfast = $todayMeals->where('breakfast', true)->count();
         $today_lunch = $todayMeals->where('lunch', true)->count();
@@ -161,7 +161,8 @@ class ManagerDashboardController extends Controller
         $dates = [];
 
         foreach ($validated['meals'] as $userId => $userDates) {
-            if (!in_array($userId, $floorUsers->toArray())) continue;
+            if (!in_array($userId, $floorUsers->toArray()))
+                continue;
             $userIds[] = $userId;
             foreach ($userDates as $date => $mealData) {
                 if (is_array($mealData) && isset($mealData['date'])) {
@@ -176,10 +177,12 @@ class ManagerDashboardController extends Controller
             ->keyBy(fn($meal) => $meal->user_id . '_' . $meal->date->format('Y-m-d'));
 
         foreach ($validated['meals'] as $userId => $userDates) {
-            if (!in_array($userId, $floorUsers->toArray())) continue;
+            if (!in_array($userId, $floorUsers->toArray()))
+                continue;
 
             foreach ($userDates as $date => $mealData) {
-                if (!is_array($mealData)) continue;
+                if (!is_array($mealData))
+                    continue;
 
                 $actualDate = $mealData['date'] ?? $date;
                 $actualUserId = $mealData['user_id'] ?? $userId;
@@ -284,15 +287,15 @@ class ManagerDashboardController extends Controller
         $payments = Payment::whereHas('user', fn($q) => $q->where('meal_floor', $floor))
             ->with('user')
             ->get();
-        return view('manager.payment',compact('users','payments'));
+        return view('manager.payment', compact('users', 'payments'));
     }
 
     public function meals()
     {
         $floor = Auth::user()->meal_floor;
-         $currentMonth = now()->month;
+        $currentMonth = now()->month;
         $currentYear = now()->year;
-        
+
         // Get all active users on manager's floor
         $users = User::where('status', 'active')
             ->where('meal_floor', $floor)
@@ -302,31 +305,81 @@ class ManagerDashboardController extends Controller
             ->whereMonth('date', $currentMonth)
             ->whereHas('user', fn($q) => $q->where('meal_floor', $floor))
             ->get();
-        
-        return view('manager.meal',compact('floor','users','meals'));
+
+        return view('manager.meal', compact('floor', 'users', 'meals'));
     }
 
     public function bazars()
     {
-          $floor = Auth::user()->meal_floor;
-         $users = User::where('status', 'active')
+        $floor = Auth::user()->meal_floor;
+        $users = User::where('status', 'active')
             ->where('meal_floor', $floor)
             ->get();
-        return view('manager.bazars',compact('users'));
+        return view('manager.bazars', compact('users'));
     }
 
     public function guest()
     {
         $floor = Auth::user()->meal_floor;
-         $users = User::where('status', 'active')
+        $users = User::where('status', 'active')
             ->where('meal_floor', $floor)
             ->get();
-        return view('manager.guest',compact('users'));
+        return view('manager.guest', compact('users'));
     }
 
     public function makemanager()
     {
-        
-        return view('manager.makemanager');
+        $floor = Auth::user()->meal_floor;
+        $users = User::where('status', 'active')
+            ->where('meal_floor', $floor)
+            ->where('id', '!=', Auth::id())
+            ->get();
+        return view('manager.makemanager', compact('users'));
+    }
+    public function make(Request $request)
+    {
+        // Make selected user admin
+        $user = User::findOrFail($request->user_id);
+        $user->role = 'manager';
+        $user->save();
+
+        // Downgrade current user
+        $currentUser = Auth::user();
+        $currentUser->role = 'user';
+        $currentUser->save();
+
+        // Logout current user
+        Auth::logout();
+
+        return redirect('/login')->with('success', 'Role updated successfully');
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        try {
+            // Find the user by ID
+            $user = User::findOrFail($id);
+
+            // Prevent deleting yourself (optional but recommended)
+            if ($user->id === auth()->id()) {
+                return redirect()->back()->with('error', 'You cannot delete your own account.');
+            }
+
+
+
+            // Store user name for success message
+            $userName = $user->name;
+
+            // Delete the user
+            $user->delete();
+
+            return redirect()->back() // Adjust route name as needed
+                ->with('success', "Member '{$userName}' has been successfully deleted.");
+
+        } catch (\Exception $e) {
+            
+            return redirect()->back()
+                ->with('error', 'An error occurred while trying to delete the member. Please try again.'.$e->getMessage());
+        }
     }
 }
