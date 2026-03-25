@@ -13,13 +13,7 @@
             <div class="w-full max-w-md">
                 <!-- Mobile Logo -->
                 <div class="lg:hidden mb-8 text-center">
-                    <div class="inline-flex backdrop-blur-sm bg-white/10 w-16 h-16 rounded-2xl items-center justify-center border-2 border-white/20 mb-4">
-                        <svg class="w-10 h-10 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
-                            <path d="M7 2v20"></path>
-                            <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
-                        </svg>
-                    </div>
+                    
                     <h2 class="text-2xl font-bold text-black drop-shadow-lg">Hall Meal System</h2>
                 </div>
 
