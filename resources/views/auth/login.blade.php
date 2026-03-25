@@ -1,12 +1,12 @@
 <x-guest-layout>
     <div class="min-h-screen flex relative overflow-hidden">
-        <!-- Animated Background Elements -->
+        {{-- <!-- Animated Background Elements -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute -top-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
             <div class="absolute -top-20 -right-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
             <div class="absolute -bottom-40 left-20 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
             <div class="absolute top-1/2 right-1/4 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-3000"></div>
-        </div>
+        </div> --}}
 
         <!-- Right Side - Login Form -->
         <div class="w-full lg:w-full flex items-center justify-center p-8 relative z-10">
