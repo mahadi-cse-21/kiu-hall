@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     {
        User::create(
         [
-            'name'=>'manager',
+            'name'=>'Mahadi Hassan',
             'email'=>'mahadi.cse.21@gmail.com',
             'role'=>'manager',
             'meal_floor'=>'3',
@@ -25,6 +25,18 @@ class UserSeeder extends Seeder
             'password'=>Hash::make('12341234'),
         ]
        );
+       User::create(
+        [
+            'name'=>'Mahadi Hassan',
+            'email'=>'mahadi.cse.22@gmail.com',
+            'role'=>'manager',
+            'meal_floor'=>'1',
+            'status'=>'active',
+            'contact'=>'01780689788',
+            'password'=>Hash::make('12341234'),
+        ]
+       );
+       
     //    User::factory()->create(
     //     [
     //         'name'=>'manager',
