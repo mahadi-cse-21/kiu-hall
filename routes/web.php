@@ -2,17 +2,18 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 // Root redirect - goes to login or appropriate dashboard
 Route::get('/', function () {
-    return auth()->check() 
+    return Auth::check() 
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
 
 // Dynamic dashboard route - redirects based on user role
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    $user = Auth::user();
     
     if ($user->role == 'manager') {
         return redirect()->route('manager.dashboard');

@@ -1,5 +1,66 @@
 <x-app-layout>
-    <x-slot name="header">
+   @if($member)
+    @if($member[0]->status=='pending' or  $member[0]->status=='rejected')
+        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8 text-center">
+                <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-yellow-100">
+                    <svg class="h-12 w-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                
+                <div>
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+                        @if($member[0]->status == 'pending')
+                            Membership Pending
+                        @else
+                            Membership Rejected
+                        @endif
+                    </h2>
+                    
+                    <div class="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    @if($member[0]->status == 'pending')
+                                        Your membership application is pending approval. 
+                                        Please contact the floor manager for assistance.
+                                    @else
+                                        Your membership application has been rejected. 
+                                        <form action="{{ route('request') }}" method="POST" class="inline-block">
+    @csrf
+    <input type="hidden" name="id" value="{{ $member[0]->id }}">
+    <button type="submit" 
+        class="bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 
+               border border-green-600 px-6 py-2.5 my-2 text-white text-sm font-medium 
+               rounded-lg shadow-md hover:shadow-lg transition-all duration-200 
+               focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+               inline-flex items-center space-x-2">    
+
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        <span>Re-request Membership</span>
+    </button>
+</form>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @else
+        <x-slot name="header">
         <div class="">
             <h2
                 class="font-bold text-xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
@@ -518,4 +579,42 @@
             });
         });
     </script>
+    @endif
+@else
+    {{-- No member record exists --}}
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8 text-center">
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-red-100">
+                <svg class="h-12 w-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            
+            <div>
+                <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+                    Not a Member
+                </h2>
+                
+                <div class="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                You are not a member of any mess yet. 
+                                Please contact the floor manager to complete your registration.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+    
 </x-app-layout>

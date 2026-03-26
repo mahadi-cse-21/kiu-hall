@@ -9,6 +9,7 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Meal;
+use App\Models\Memberrequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -334,7 +335,13 @@ class ManagerDashboardController extends Controller
             ->where('meal_floor', $floor)
             ->where('id', '!=', Auth::id())
             ->get();
-        return view('manager.makemanager', compact('users'));
+        $pendingRequests = Memberrequest::with('user')
+            ->where('status', 'pending')
+            ->whereHas('user', function ($query) use ($floor) {
+                $query->where('meal_floor', $floor);
+            })
+            ->get();
+        return view('manager.makemanager', compact('users', 'pendingRequests'));
     }
     public function make(Request $request)
     {
@@ -352,6 +359,14 @@ class ManagerDashboardController extends Controller
         Auth::logout();
 
         return redirect('/login')->with('success', 'Role updated successfully');
+    }
+
+    public function approveOrReject(Request $request)
+    {
+        $member = Memberrequest::findOrFail($request->id);
+        $member->status = $request->status;
+        $member->save();
+        return redirect()->back()->with('success','You have successfully '.$request->status.' this member');
     }
 
     public function destroy(Request $request, $id)
@@ -377,9 +392,9 @@ class ManagerDashboardController extends Controller
                 ->with('success', "Member '{$userName}' has been successfully deleted.");
 
         } catch (\Exception $e) {
-            
+
             return redirect()->back()
-                ->with('error', 'An error occurred while trying to delete the member. Please try again.'.$e->getMessage());
+                ->with('error', 'An error occurred while trying to delete the member. Please try again.' . $e->getMessage());
         }
     }
 }

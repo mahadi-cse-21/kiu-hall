@@ -1,4 +1,5 @@
 <x-guest-layout>
+    
     <div class="min-h-screen flex relative overflow-hidden">
         {{-- <!-- Animated Background Elements -->
         <div class="absolute inset-0 overflow-hidden">

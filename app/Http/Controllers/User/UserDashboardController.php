@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Bazar;
 use App\Models\Meal;
+use App\Models\Memberrequest;
 use App\Models\User;
 use App\Models\Payment;
 use Carbon\Carbon;
@@ -18,9 +19,12 @@ class UserDashboardController extends Controller
     {
         $count = 0;
 
-        if ($meal->breakfast) $count += 0.5;
-        if ($meal->lunch)     $count += 1;
-        if ($meal->dinner)    $count += 1;
+        if ($meal->breakfast)
+            $count += 0.5;
+        if ($meal->lunch)
+            $count += 1;
+        if ($meal->dinner)
+            $count += 1;
 
         return $count;
     }
@@ -29,7 +33,6 @@ class UserDashboardController extends Controller
     {
         $user = Auth::user();
         $today = now()->toDateString();
-
 
         // Meals
         $myMeals = Meal::where('user_id', $user->id)->get();
@@ -58,7 +61,7 @@ class UserDashboardController extends Controller
 
         $total_week_meal = $myWeekMeals->sum(fn($m) => $this->mealCount($m));
 
-       
+
         // Total meals of the floor
         $floor_users = User::where('meal_floor', $user->meal_floor)->pluck('id');
 
@@ -77,17 +80,21 @@ class UserDashboardController extends Controller
         // User’s due
         $amount_due = round(($total_meal * $cost_per_meal) - $total_paid_from_payments, 2);
 
+        $member = Memberrequest::where('user_id',$user->id)->get(); 
+
+        
+
         return view('user.dashboard', [
-            'total_meal'      => round($total_meal, 1),
+            'total_meal' => round($total_meal, 1),
             'total_week_meal' => round($total_week_meal, 1),
-            'meal_breakfast'  => $todayMeal->breakfast ?? false,
-            'meal_lunch'      => $todayMeal->lunch ?? false,
-            'meal_dinner'     => $todayMeal->dinner ?? false,
-            'todayMeal'       => $todayMeal,
-            'cost_per_meal'   => $cost_per_meal,
-            'amount_due'      => $amount_due,
-            'myPayments'      => $myPayments,
-            'payment_stats'   => [
+            'meal_breakfast' => $todayMeal->breakfast ?? false,
+            'meal_lunch' => $todayMeal->lunch ?? false,
+            'meal_dinner' => $todayMeal->dinner ?? false,
+            'todayMeal' => $todayMeal,
+            'cost_per_meal' => $cost_per_meal,
+            'amount_due' => $amount_due,
+            'myPayments' => $myPayments,
+            'payment_stats' => [
                 'total_paid' => $total_paid_from_payments,
                 'last_payment' => $myPayments->first(),
                 'payment_count' => $myPayments->count(),
@@ -96,6 +103,7 @@ class UserDashboardController extends Controller
                     : 0,
             ],
             'meal_floor' => $user->meal_floor ?? 1,
+            'member' =>$member,
         ]);
     }
 
@@ -108,17 +116,17 @@ class UserDashboardController extends Controller
 
         $meal = Meal::firstOrNew([
             'user_id' => $user->id,
-            'date'    => $today,
+            'date' => $today,
         ]);
 
         // Correct cutoff times using app timezone
         $breakfastCutoff = now()->setTime(6, 0);
-        $lunchCutoff     = now()->setTime(11, 30);
-        $dinnerCutoff    = now()->setTime(17, 0);
+        $lunchCutoff = now()->setTime(11, 30);
+        $dinnerCutoff = now()->setTime(17, 0);
 
         $breakfast = $request->boolean('breakfast');
-        $lunch     = $request->boolean('lunch');
-        $dinner    = $request->boolean('dinner');
+        $lunch = $request->boolean('lunch');
+        $dinner = $request->boolean('dinner');
 
         if ($breakfast != $meal->breakfast && $now->gte($breakfastCutoff)) {
             return back()->with('error', 'Breakfast booking time is over!');
@@ -131,8 +139,8 @@ class UserDashboardController extends Controller
         }
 
         $meal->breakfast = $breakfast;
-        $meal->lunch     = $lunch;
-        $meal->dinner    = $dinner;
+        $meal->lunch = $lunch;
+        $meal->dinner = $dinner;
         $meal->save();
 
         return back()->with('success', 'Meals saved successfully!');
@@ -145,10 +153,10 @@ class UserDashboardController extends Controller
 
         $validated = $request->validate([
             'start_date' => 'required|date|after_or_equal:today',
-            'end_date'   => 'required|date|after_or_equal:start_date',
-            'meals'      => 'required|array|min:1',
-            'meals.*'    => 'in:breakfast,lunch,dinner',
-            'reason'     => 'nullable|string|max:500',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'meals' => 'required|array|min:1',
+            'meals.*' => 'in:breakfast,lunch,dinner',
+            'reason' => 'nullable|string|max:500',
         ]);
 
         $period = CarbonPeriod::create($validated['start_date'], $validated['end_date']);
@@ -157,7 +165,7 @@ class UserDashboardController extends Controller
 
             $meal = Meal::firstOrNew([
                 'user_id' => $user->id,
-                'date'    => $date->format('Y-m-d'),
+                'date' => $date->format('Y-m-d'),
             ]);
 
             // Turn OFF only the selected meals — do not turn ON others
@@ -183,7 +191,7 @@ class UserDashboardController extends Controller
             ->paginate(10);
 
         return view('user.payment-history', [
-            'payments'   => $payments,
+            'payments' => $payments,
             'total_paid' => $payments->sum('amount'),
         ]);
     }

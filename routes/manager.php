@@ -24,6 +24,8 @@ Route::prefix('manager')->group(function () {
 
         Route::get('/makemanager',[ManagerDashboardController::class,'makemanager'])->name('manager.makemanager');
 
+        Route::post('/member/status',[ManagerDashboardController::class,'approveOrReject'])->name('manager.approveOrreject');
+
         Route::post('/makemanager',[ManagerDashboardController::class,'make'])->name('manager.make');
         Route::delete('/destroy/{id}',[ManagerDashboardController::class,'destroy'])->name('manager.destroy');
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Memberrequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -61,6 +62,11 @@ class RegisteredUserController extends Controller
         }
         elseif($user->role=='user')
         {
+            Memberrequest::create([
+                'user_id'=>$user->id,
+                'status'=>'pending'
+            ]);
+
             return redirect(route('user.dashboard', absolute: false));
         }
         else
